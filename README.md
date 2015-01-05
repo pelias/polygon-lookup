@@ -30,6 +30,10 @@ stream.write({ center_point: centroid } );
 stream.end();
 ```
 
+## Centroid Property
+
+By default the stream looks for lat/lon info in a property called `center_point`, you can change this behavior by overloading the options in the constructor (see the code).
+
 ## NPM Module
 
 The `pelias-hierarchy-lookup` npm module can be found here:
