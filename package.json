@@ -1,0 +1,39 @@
+{
+  "name": "pelias-hierarchy-lookup",
+  "author": "mapzen",
+  "version": "0.0.1",
+  "description": "Query for performing multi-layer polygon intersection queries",
+  "homepage": "https://github.com/pelias/hierarchy-lookup",
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/run.js | tap-spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/pelias/hierarchy-lookup.git"
+  },
+  "keywords": [
+    "pelias",
+    "hierarchy-lookup"
+  ],
+  "bugs": {
+    "url": "https://github.com/pelias/hierarchy-lookup/issues"
+  },
+  "engines": {
+    "node": ">=0.10.26",
+    "npm": ">=1.4.3",
+    "elasticsearch": ">=1.1.1"
+  },
+  "dependencies": {
+    "async": "^0.9.0",
+    "geopipes-elasticsearch-backend": "0.0.8",
+    "is-object": "^1.0.1",
+    "pelias-dbclient": "0.0.6",
+    "through2": "^0.6.3"
+  },
+  "devDependencies": {
+    "tape": "^2.13.4",
+    "tap-spec": "^0.2.0"
+  }
+}
