@@ -3,6 +3,8 @@
 
 The functionality and parameters are specific to Pelias, only use this module if you know what you're doing.
 
+**This requires that the quattroshapes data has already been imported and the indeces have been refreshed and ready for querying**
+
 ## Installation
 
 ```bash
