@@ -1,3 +1,4 @@
+[![NPM](https://nodei.co/npm/pelias-hierarchy-lookup.png?downloads=true&stars=true)](https://nodei.co/npm/pelias-hierarchy-lookup)
 
 **This module status is currently beta, the API may change in the future.**
 
@@ -10,8 +11,6 @@ The functionality and parameters are specific to Pelias, only use this module if
 ```bash
 $ npm install pelias-hierarchy-lookup
 ```
-
-[![NPM](https://nodei.co/npm/pelias-hierarchy-lookup.png?downloads=true&stars=true)](https://nodei.co/npm/pelias-hierarchy-lookup)
 
 ## Usage
 
@@ -30,9 +29,14 @@ stream.write({ center_point: centroid } );
 stream.end();
 ```
 
-## Centroid Property
+### options
+The `stream()` constructor accepts an options object, which configures the behavior of the lookup and may contain any of the following keys:
 
-By default the stream looks for lat/lon info in a property called `center_point`, you can change this behavior by overloading the options in the constructor (see the code).
+  * `prop`: by default the stream looks for an object containing `lat`/`lon` keys in a property called `center_point`;
+    a different property name can be specified here.
+  * `logLevel`: the minimum level of log messages that the underlying logger,
+    [Winston](https://github.com/flatiron/winston), will print to the console. Defaults to `error`; see all possible
+    [options](https://github.com/flatiron/winston#using-logging-levels).
 
 ## NPM Module
 
