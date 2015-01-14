@@ -5,7 +5,7 @@ module.exports.tests = {};
 
 module.exports.tests.interface = function(test, common) {
   test('valid interface', function(t) {
-    t.equal(typeof exports, 'function', 'valid factory function');
+    t.equal(typeof exports.stream, 'function', 'valid factory function');
     t.end();
   });
 };
