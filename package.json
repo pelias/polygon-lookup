@@ -1,7 +1,7 @@
 {
   "name": "pelias-hierarchy-lookup",
   "author": "mapzen",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Query for performing multi-layer polygon intersection queries",
   "homepage": "https://github.com/pelias/hierarchy-lookup",
   "license": "MIT",
@@ -30,6 +30,7 @@
     "geopipes-elasticsearch-backend": "0.0.8",
     "is-object": "^1.0.1",
     "pelias-dbclient": "0.0.6",
+    "winston": "0.8.3",
     "through2": "^0.6.3"
   },
   "devDependencies": {

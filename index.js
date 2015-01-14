@@ -1,6 +1,7 @@
 
-var isObject = require('is-object'),
-    augmentStream = require('./lib/stream');
+var isObject = require('is-object');
+var augmentStream = require('./lib/stream');
+var winston = require( 'winston' );
 
 /**
   This stream accepts object and tries to lookup hierarchy info from the property
@@ -11,15 +12,18 @@ var isObject = require('is-object'),
 
 function streamFactory( opts ){
 
-  if( !isObject( opts ) ){ opts = {}; }
+  if( !isObject( opts ) ){
+    opts = {};
+  }
+  winston.level = opts.logLevel || 'error';
 
   if( 'string' !== typeof opts.prop ){
-    console.warn( 'hierarchy-lookup: using default centroid property \'center_point\'' );
+    winston.info( 'hierarchy-lookup: using default centroid property \'center_point\'' );
     opts.prop = 'center_point';
   }
 
   if( !Array.isArray( opts.backends ) ){
-    console.warn( 'hierarchy-lookup: using default backends' );
+    winston.info( 'hierarchy-lookup: using default backends' );
     opts.backends = require('./lib/backends');
   }
 
