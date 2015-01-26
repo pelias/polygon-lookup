@@ -3,7 +3,7 @@ var exports = require('../');
 
 module.exports.tests = {};
 
-module.exports.tests.interface = function(test, common) {
+module.exports.tests.interface = function(test) {
   test('valid interface', function(t) {
     t.equal(typeof exports.stream, 'function', 'valid factory function');
     t.end();
