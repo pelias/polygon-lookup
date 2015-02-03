@@ -17,10 +17,10 @@ HierarchyLookup.prototype.search = function search( lat, lon ){
     return this.polygons[ bboxes[ 0 ].id ].properties;
   }
   else {
+    var pt = [ lon, lat ];
     for( var ind = 0; ind < bboxes.length; ind++ ){
       var polyObj = this.polygons[ bboxes[ ind ].id ];
-      var poly = polyObj.coordinates;
-      if( pointInPolygon( [ lon, lat ], poly ) ){
+      if( pointInPolygon( pt, polyObj.coordinates ) ){
         return polyObj.properties;
       }
     }
@@ -56,11 +56,13 @@ function getBoundingBox( poly ){
 }
 
 function simplifyCoords( coords ){
-  var simplificationRate = 0.0026;
   var pts = coords.map( function mapToSimplifyFmt( pt ){
     return { x: pt[ 0 ], y: pt[ 1 ] };
   });
+
+  var simplificationRate = 0.0026;
   var simplified = simplify( pts, simplificationRate, true );
+
   return simplified.map( function mapToGeoJsonFmt( pt ){
     return [ pt.x, pt.y ];
   });
@@ -68,7 +70,7 @@ function simplifyCoords( coords ){
 
 function load(path, desiredProps, cb){
   var bboxes = [];
-  var allPolygons = [];
+  var polygons = [];
   var id = 0;
 
   function indexPolygon( props, coords ){
@@ -78,7 +80,7 @@ function load(path, desiredProps, cb){
       propSubset[ propName ] = props[ propName ];
     });
 
-    allPolygons.push({
+    polygons.push({
       coordinates: simplified,
       properties: propSubset
     });
@@ -108,7 +110,7 @@ function load(path, desiredProps, cb){
 
   function end( done ){
     var rtree = new rbush().load( bboxes );
-    cb( allPolygons, rtree );
+    cb( new HierarchyLookup( rtree, polygons ) );
     done();
   }
 
@@ -118,7 +120,4 @@ function load(path, desiredProps, cb){
     .pipe( rtreeCreator );
 }
 
-module.exports = {
-  load: load,
-  search: search
-};
+module.exports = load;
