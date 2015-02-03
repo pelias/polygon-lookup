@@ -65,7 +65,7 @@ function load(path, desiredProps, cb){
 
     allPolygons.push({
       coordinates: simplified,
-      properties: extractProps( poly.properties, desiredProps )
+      properties: extractProps( props, desiredProps )
     });
 
     var bbox = getBoundingBox( simplified );
@@ -73,32 +73,34 @@ function load(path, desiredProps, cb){
     bboxes.push(bbox);
   }
 
-  shapefileStream.createReadStream( path )
-    .pipe( through.obj(
-      function write( poly, enc, next ){
-        if( poly.geometry !== null &&
-          poly.geometry.coordinates[ 0 ].length > 0 ){
-          switch( poly.geometry.type ){
-            case 'Polygon':
-              indexPolygon( poly.properties, poly.geometry.coordinates[ 0 ] );
-              break;
+  function write( poly, enc, next ){
+    if( poly.geometry !== null && poly.geometry.coordinates[ 0 ].length > 0 ){
+      switch( poly.geometry.type ){
+        case 'Polygon':
+          indexPolygon( poly.properties, poly.geometry.coordinates[ 0 ] );
+          break;
 
-            case 'MultiPolygon':
-              var polys = poly.geometry.coordinates;
-              polys.forEach( function indexPolyCoords( polyCoords ){
-                indexPolygon( poly.properties, polyCoords[ 0 ] );
-              });
-              break;
-          }
-        }
-        next();
-      },
-      function end( done ){
-        var rtree = new rbush().load( bboxes );
-        cb( allPolygons, rtree );
-        done();
+        case 'MultiPolygon':
+          var polys = poly.geometry.coordinates;
+          polys.forEach( function indexPolyCoords( polyCoords ){
+            indexPolygon( poly.properties, polyCoords[ 0 ] );
+          });
+          break;
       }
-    ));
+    }
+    next();
+  }
+
+  function end( done ){
+    var rtree = new rbush().load( bboxes );
+    cb( allPolygons, rtree );
+    done();
+  }
+
+  var rtreeCreator = through.obj( write, end );
+  shapefileStream
+    .createReadStream( path )
+    .pipe( rtreeCreator );
 }
 
 function search( polygons, rtree, lat, lon ){
