@@ -58,8 +58,21 @@ function extractProps( allProps, desiredProps ){
 function load(path, desiredProps, cb){
   var bboxes = [];
   var allPolygons = [];
-
   var id = 0;
+
+  function indexPolygon( props, coords ){
+    var simplified = simplifyCoords( coords );
+
+    allPolygons.push({
+      coordinates: simplified,
+      properties: extractProps( poly.properties, desiredProps )
+    });
+
+    var bbox = getBoundingBox( simplified );
+    bbox.id = id++;
+    bboxes.push(bbox);
+  }
+
   shapefileStream.createReadStream( path )
     .pipe( through.obj(
       function write( poly, enc, next ){
@@ -67,33 +80,14 @@ function load(path, desiredProps, cb){
           poly.geometry.coordinates[ 0 ].length > 0 ){
           switch( poly.geometry.type ){
             case 'Polygon':
-              var simplified = simplifyCoords( poly.geometry.coordinates[ 0 ] );
-
-              allPolygons.push({
-                coordinates: simplified,
-                properties: extractProps( poly.properties, desiredProps )
-              });
-
-              var bbox = getBoundingBox( simplified );
-              bbox.id = id++;
-              bboxes.push(bbox);
-
+              indexPolygon( poly.properties, poly.geometry.coordinates[ 0 ] );
               break;
 
             case 'MultiPolygon':
               var polys = poly.geometry.coordinates;
-              for( var polyInd = 0; polyInd < polys.length; polyInd++ ){
-                var simplified = simplifyCoords( polys[ polyInd ][ 0 ] );
-
-                allPolygons.push( {
-                  coordinates: simplified,
-                  properties: extractProps( poly.properties, desiredProps )
-                });
-
-                var bbox = getBoundingBox( simplified );
-                bbox.id = id++;
-                bboxes.push(bbox);
-              }
+              polys.forEach( function indexPolyCoords( polyCoords ){
+                indexPolygon( poly.properties, polyCoords[ 0 ] );
+              });
               break;
           }
         }
