@@ -20,55 +20,53 @@ PolygonLookup.prototype.search = function search( lat, lon ){
     var pt = [ lon, lat ];
     for( var ind = 0; ind < bboxes.length; ind++ ){
       var polyObj = this.polygons[ bboxes[ ind ].id ];
-      if( pointInPolygon( pt, polyObj.coordinates ) ){
+      var polyCoords = polyObj.geometry.coordinates[ 0 ];
+      if( pointInPolygon( pt, polyCoords ) ){
         return polyObj.properties;
       }
     }
   }
 };
 
-Polygon.proptotype.loadPolygons = function loadPolygons(featureCollection, desiredProps){
+PolygonLookup.prototype.loadPolygons = function loadPolygons( featureCollection ){
   var bboxes = [];
   var polygons = [];
-  var id = 0;
+  var polyId = 0;
 
-  function indexPolygon( props, coords ){
-    var simplified = polygonUtils.simplifyCoords( coords );
-    var propSubset = {};
-    desiredProps.forEach( function ( propName ){
-      propSubset[ propName ] = props[ propName ];
-    });
-
-    polygons.push({
-      coordinates: simplified,
-      properties: propSubset
-    });
-
-    var bbox = polygonUtils.getBoundingBox( simplified );
-    bbox.id = id++;
+  function indexPolygon( poly ){
+    var coords = poly.geometry.coordinates[ 0 ];
+    polygons.push(poly);
+    var bbox = polygonUtils.getBoundingBox( coords );
+    bbox.polyId = polyId++;
     bboxes.push(bbox);
   }
 
   function indexFeature( poly ){
-    if( poly.geometry !== null && poly.geometry.coordinates[ 0 ].length > 0 ){
-      switch( poly.geometry.type ){
-        case 'Polygon':
-          indexPolygon( poly.properties, poly.geometry.coordinates[ 0 ] );
-          break;
+    switch( poly.geometry.type ){
+      case 'Polygon':
+        indexPolygon( poly );
+        break;
 
-        case 'MultiPolygon':
-          var polys = poly.geometry.coordinates;
-          polys.forEach( function indexPolyCoords( polyCoords ){
-            indexPolygon( poly.properties, polyCoords[ 0 ] );
-          });
-          break;
-      }
+      case 'MultiPolygon':
+        var childPolys = poly.geometry.coordinates;
+        for( var ind = 0; ind < childPolys.length; ind++ ){
+          var childPoly = {
+            type: 'Feature',
+            properties: poly.properties,
+            geometry: {
+              type: 'Polygon',
+              coordinates: childPolys[ ind ]
+            }
+          };
+          indexPolygon( childPoly );
+        }
+        break;
     }
   }
 
   featureCollection.forEach( indexFeature );
   this.rtree = new rbush().load( bboxes );
   this.polygons = polygons;
-}
+};
 
 module.exports = PolygonLookup;
