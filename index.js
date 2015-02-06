@@ -1,18 +1,17 @@
 'use strict';
 
-var shapefileStream = require( 'shapefile-stream' );
 var rbush = require( 'rbush' );
 var pointInPolygon = require( 'point-in-polygon' );
-var through = require( 'through2' );
 
 var polygonUtils = require( './lib/polygon_utils' );
 
-function HierarchyLookup( rtree, polygons ){
-  this.rtree = rtree;
-  this.polygons = polygons;
+function PolygonLookup( featureCollection ){
+  if( featureCollection !== undefined ){
+    this.loadPolygons( featureCollection );
+  }
 }
 
-HierarchyLookup.prototype.search = function search( lat, lon ){
+PolygonLookup.prototype.search = function search( lat, lon ){
   var bboxes = this.rtree.search( [ lon, lat, lon, lat ] );
   if( bboxes.length === 1 ){
     return this.polygons[ bboxes[ 0 ].id ].properties;
@@ -28,7 +27,7 @@ HierarchyLookup.prototype.search = function search( lat, lon ){
   }
 };
 
-function load(path, desiredProps, cb){
+Polygon.proptotype.loadPolygons = function loadPolygons(featureCollection, desiredProps){
   var bboxes = [];
   var polygons = [];
   var id = 0;
@@ -50,7 +49,7 @@ function load(path, desiredProps, cb){
     bboxes.push(bbox);
   }
 
-  function write( poly, enc, next ){
+  function indexFeature( poly ){
     if( poly.geometry !== null && poly.geometry.coordinates[ 0 ].length > 0 ){
       switch( poly.geometry.type ){
         case 'Polygon':
@@ -65,19 +64,11 @@ function load(path, desiredProps, cb){
           break;
       }
     }
-    next();
   }
 
-  function end( done ){
-    var rtree = new rbush().load( bboxes );
-    cb( new HierarchyLookup( rtree, polygons ) );
-    done();
-  }
-
-  var rtreeCreator = through.obj( write, end );
-  shapefileStream
-    .createReadStream( path )
-    .pipe( rtreeCreator );
+  featureCollection.forEach( indexFeature );
+  this.rtree = new rbush().load( bboxes );
+  this.polygons = polygons;
 }
 
-module.exports = load;
+module.exports = PolygonLookup;
