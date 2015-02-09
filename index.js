@@ -6,14 +6,14 @@ var polygonUtils = require( './lib/polygon_utils' );
 
 function PolygonLookup( featureCollection ){
   if( featureCollection !== undefined ){
-    this.loadPolygons( featureCollection );
+    this.loadFeatureCollection( featureCollection );
   }
 }
 
 PolygonLookup.prototype.search = function search( lat, lon ){
   var bboxes = this.rtree.search( [ lon, lat, lon, lat ] );
   if( bboxes.length === 1 ){
-    return this.polygons[ bboxes[ 0 ].polyId ].properties;
+    return this.polygons[ bboxes[ 0 ].polyId ];
   }
   else {
     var pt = [ lon, lat ];
@@ -21,7 +21,7 @@ PolygonLookup.prototype.search = function search( lat, lon ){
       var polyObj = this.polygons[ bboxes[ ind ].polyId ];
       var polyCoords = polyObj.geometry.coordinates[ 0 ];
       if( pointInPolygon( pt, polyCoords ) ){
-        return polyObj.properties;
+        return polyObj;
       }
     }
   }
@@ -33,33 +33,35 @@ PolygonLookup.prototype.loadFeatureCollection = function loadFeatureCollection( 
   var polyId = 0;
 
   function indexPolygon( poly ){
-    var coords = poly.geometry.coordinates[ 0 ];
     polygons.push(poly);
-    var bbox = polygonUtils.getBoundingBox( coords );
+    var bbox = polygonUtils.getBoundingBox( poly.geometry.coordinates[ 0 ] );
     bbox.polyId = polyId++;
     bboxes.push(bbox);
   }
 
   function indexFeature( poly ){
-    switch( poly.geometry.type ){
-      case 'Polygon':
-        indexPolygon( poly );
-        break;
+    if( poly.geometry.coordinates[ 0 ] !== undefined &&
+        poly.geometry.coordinates[ 0 ].length > 0){
+      switch( poly.geometry.type ){
+        case 'Polygon':
+          indexPolygon( poly );
+          break;
 
-      case 'MultiPolygon':
-        var childPolys = poly.geometry.coordinates;
-        for( var ind = 0; ind < childPolys.length; ind++ ){
-          var childPoly = {
-            type: 'Feature',
-            properties: poly.properties,
-            geometry: {
-              type: 'Polygon',
-              coordinates: childPolys[ ind ]
-            }
-          };
-          indexPolygon( childPoly );
-        }
-        break;
+        case 'MultiPolygon':
+          var childPolys = poly.geometry.coordinates;
+          for( var ind = 0; ind < childPolys.length; ind++ ){
+            var childPoly = {
+              type: 'Feature',
+              properties: poly.properties,
+              geometry: {
+                type: 'Polygon',
+                coordinates: childPolys[ ind ]
+              }
+            };
+            indexPolygon( childPoly );
+          }
+          break;
+      }
     }
   }
 
