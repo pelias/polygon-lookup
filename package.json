@@ -1,9 +1,9 @@
 {
-  "name": "pelias-hierarchy-lookup",
+  "name": "polygon-lookup",
   "author": "mapzen",
-  "version": "0.0.5",
-  "description": "Query for performing multi-layer polygon intersection queries",
-  "homepage": "https://github.com/pelias/hierarchy-lookup",
+  "version": "0.0.7",
+  "description": "Fast point-in-polygon intersection for large numbers of polygons.",
+  "homepage": "https://github.com/pelias/polygon-lookup",
   "license": "MIT",
   "main": "index.js",
   "scripts": {
@@ -11,14 +11,17 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/pelias/hierarchy-lookup.git"
+    "url": "git://github.com/pelias/polygon-lookup.git"
   },
   "keywords": [
-    "pelias",
-    "hierarchy-lookup"
+    "polygon",
+    "lookup",
+    "intersection",
+    "coarse",
+    "reverse-geocode"
   ],
   "bugs": {
-    "url": "https://github.com/pelias/hierarchy-lookup/issues"
+    "url": "https://github.com/pelias/polygon-lookup/issues"
   },
   "engines": {
     "node": ">=0.10.26",
@@ -28,9 +31,6 @@
   "dependencies": {
     "point-in-polygon": "0.0.0",
     "rbush": "1.3.4",
-    "shapefile-stream": "0.0.4",
-    "simplify-js": "1.2.1",
-    "winston": "0.8.3",
     "through2": "^0.6.3"
   },
   "devDependencies": {
