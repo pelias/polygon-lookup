@@ -2,7 +2,6 @@
 
 var rbush = require( 'rbush' );
 var pointInPolygon = require( 'point-in-polygon' );
-
 var polygonUtils = require( './lib/polygon_utils' );
 
 function PolygonLookup( featureCollection ){
@@ -14,12 +13,12 @@ function PolygonLookup( featureCollection ){
 PolygonLookup.prototype.search = function search( lat, lon ){
   var bboxes = this.rtree.search( [ lon, lat, lon, lat ] );
   if( bboxes.length === 1 ){
-    return this.polygons[ bboxes[ 0 ].id ].properties;
+    return this.polygons[ bboxes[ 0 ].polyId ].properties;
   }
   else {
     var pt = [ lon, lat ];
     for( var ind = 0; ind < bboxes.length; ind++ ){
-      var polyObj = this.polygons[ bboxes[ ind ].id ];
+      var polyObj = this.polygons[ bboxes[ ind ].polyId ];
       var polyCoords = polyObj.geometry.coordinates[ 0 ];
       if( pointInPolygon( pt, polyCoords ) ){
         return polyObj.properties;
@@ -28,7 +27,7 @@ PolygonLookup.prototype.search = function search( lat, lon ){
   }
 };
 
-PolygonLookup.prototype.loadPolygons = function loadPolygons( featureCollection ){
+PolygonLookup.prototype.loadFeatureCollection = function loadFeatureCollection( collection ){
   var bboxes = [];
   var polygons = [];
   var polyId = 0;
@@ -64,7 +63,7 @@ PolygonLookup.prototype.loadPolygons = function loadPolygons( featureCollection 
     }
   }
 
-  featureCollection.forEach( indexFeature );
+  collection.features.forEach( indexFeature );
   this.rtree = new rbush().load( bboxes );
   this.polygons = polygons;
 };
