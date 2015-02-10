@@ -92,7 +92,7 @@ tape( 'PolygonLookup.search() searches correctly.', function ( test ){
 
   testCases.forEach( function ( testCase ){
     var pt = testCase.point;
-    var poly = lookup.search( pt[ 1 ], pt[ 0 ] );
+    var poly = lookup.search( pt[ 0 ], pt[ 1 ] );
     if( 'id' in testCase ){
       test.equal(
         poly.properties.id, testCase.id,

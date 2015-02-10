@@ -28,20 +28,20 @@ function PolygonLookup( featureCollection ){
  * narrow down the candidate polygons to a small subset, and then perform
  * additional point-in-polygon intersections to resolve any ambiguities.
  *
- * @param {number} lat The latitude of the point.
- * @param {number} lon The longitude of the point.
+ * @param {number} x The x-coordinate of the point.
+ * @param {number} y The y-coordinate of the point.
  * @return {undefined|object} If one bounding-box match was found, return the
  *    respective polygon; if multiple matches were found, return the first one
  *    that's identified to definitely intersect; if none were found,
  *    `undefined`.
  */
-PolygonLookup.prototype.search = function search( lat, lon ){
-  var bboxes = this.rtree.search( [ lon, lat, lon, lat ] );
+PolygonLookup.prototype.search = function search( x, y ){
+  var bboxes = this.rtree.search( [ x, y, x, y ] );
   if( bboxes.length === 1 ){
     return this.polygons[ bboxes[ 0 ].polyId ];
   }
   else {
-    var pt = [ lon, lat ];
+    var pt = [ x, y ];
     for( var ind = 0; ind < bboxes.length; ind++ ){
       var polyObj = this.polygons[ bboxes[ ind ].polyId ];
       var polyCoords = polyObj.geometry.coordinates[ 0 ];
