@@ -1,15 +1,40 @@
+/**
+ * Exports a `PolygonLookup` constructor, which constructs a data-structure for
+ * quickly finding the polygon that a point intersects in a (potentially very
+ * large) set.
+ */
+
 'use strict';
 
 var rbush = require( 'rbush' );
 var pointInPolygon = require( 'point-in-polygon' );
 var polygonUtils = require( './lib/polygon_utils' );
 
+/**
+ * @property {rbush} rtree A spatial index for `this.polygons`.
+ * @property {object} polgons A GeoJSON feature collection.
+ *
+ * @param {object} [featureCollection] An optional GeoJSON feature collection
+ *    to pass to `loadFeatureCollection()`.
+ */
 function PolygonLookup( featureCollection ){
   if( featureCollection !== undefined ){
     this.loadFeatureCollection( featureCollection );
   }
 }
 
+/**
+ * Find the polygon that a point intersects. Execute a bounding-box search to
+ * narrow down the candidate polygons to a small subset, and then perform
+ * additional point-in-polygon intersections to resolve any ambiguities.
+ *
+ * @param {number} lat The latitude of the point.
+ * @param {number} lon The longitude of the point.
+ * @return {undefined|object} If one bounding-box match was found, return the
+ *    respective polygon; if multiple matches were found, return the first one
+ *    that's identified to definitely intersect; if none were found,
+ *    `undefined`.
+ */
 PolygonLookup.prototype.search = function search( lat, lon ){
   var bboxes = this.rtree.search( [ lon, lat, lon, lat ] );
   if( bboxes.length === 1 ){
@@ -27,6 +52,12 @@ PolygonLookup.prototype.search = function search( lat, lon ){
   }
 };
 
+/**
+ * Build a spatial index for a set of polygons, and store both the polygons and
+ * the index in this `PolygonLookup`.
+ *
+ * @param {object} collection A GeoJSON-formatted FeatureCollection.
+ */
 PolygonLookup.prototype.loadFeatureCollection = function loadFeatureCollection( collection ){
   var bboxes = [];
   var polygons = [];
