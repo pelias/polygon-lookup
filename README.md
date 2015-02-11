@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/pelias/polygon-lookup.svg?branch=master)](https://travis-ci.org/pelias/polygon-lookup)
 
-[![NPM](https://nodei.co/npm/pelias-polygon-lookup.png)](https://nodei.co/npm/pelias-polygon-lookup/)
+[![NPM](https://nodei.co/npm/polygon-lookup.png)](https://nodei.co/npm/polygon-lookup/)
 
 A data-structure for performing fast, accurate point-in-polygon intersections against (potentially very large) sets of
 polygons. `PolygonLookup` builds an [R-tree](http://en.wikipedia.org/wiki/R-tree), or bounding-box spatial index, for its
