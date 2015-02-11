@@ -1,63 +1,52 @@
-[![NPM](https://nodei.co/npm/pelias-hierarchy-lookup.png?downloads=true&stars=true)](https://nodei.co/npm/pelias-hierarchy-lookup)
+# polygon-lookup
 
-**This module status is currently beta, the API may change in the future.**
+[![Build Status](https://travis-ci.org/pelias/polygon-lookup.svg?branch=master)](https://travis-ci.org/pelias/polygon-lookup)
 
-The functionality and parameters are specific to Pelias, only use this module if you know what you're doing.
+[![NPM](https://nodei.co/npm/pelias-polygon-lookup.png)](https://nodei.co/npm/pelias-polygon-lookup/)
 
-**This requires that the quattroshapes data has already been imported and the indeces have been refreshed and ready for querying**
+A data-structure for performing fast, accurate point-in-polygon intersections against (potentially very large) sets of
+polygons. `PolygonLookup` builds an [R-tree](http://en.wikipedia.org/wiki/R-tree), or bounding-box spatial index, for its
+polygons and uses it to quickly narrow down the set of candidate polygons for any given point. If there are any
+ambiguities, it'll perform point-in-polygon intersections to identify the one that *really* intersects. `PolygonLookup`
+operates entirely in memory, and works best for polygons with little overlap.
 
-## Installation
+## API
 
-```bash
-$ npm install pelias-hierarchy-lookup
-```
+##### `PolygonLookup(featureCollection)`
+  * `featureCollection` (**optional**): A GeoJSON collection to optionally immediately load with `.loadFeatureCollection()`.
 
-## Usage
+##### `PolygonLookup.search(x, y)`
+Narrows down the candidate polygons by bounding-box. If only one bbox intersects, immediately return the corresponding
+polygon (this *may* result in a false flag intersection); if more than one was found, perform point-in-polygon
+intersections (this'll only return the *first* polygon that's found to intersect).
+
+  * `x`: the x-coordinate to search for
+  * `y`: the y-coordinate to search for
+  * `return`: the intersecting polygon if one was found; otherwise, `undefined`.
+
+##### `PolygonLookup.loadFeatureCollection(featureCollection)`
+Stores a feature collection in this `PolygonLookup`, and builds a spatial index for it. The polygons and rtree can be
+accessed via the `.polygons` and `.rtree` properties.
+
+  * `featureCollection` (**optional**): A GeoJSON collection containing some Polygons/MultiPolygons. Note that
+    MultiPolygons will get expanded into multiple polygons.
+
+## example usage
 
 ```javascript
-var lookup = require('pelias-hierarchy-lookup'),
-    stream = lookup.stream(),
-    through = require('through2');
-
-stream.pipe( through.obj( function( item, enc, next ){
-  console.log( item );
-  next();
-}));
-
-var centroid = { lat: 51.5328850, lon: -0.0652280 };
-stream.write({ center_point: centroid } );
-stream.end();
+var PolygonLookup = require( 'polygon-lookup' );
+var featureCollection = {
+	type: 'FeatureCollection',
+	features: [{
+		type: 'Feature',
+		properties: { id: 'bar' },
+		geometry: {
+			type: 'Polygon',
+			coordinates: [ [ [ 0, 1 ], [ 2, 1 ], [ 3, 4 ], [ 1, 5 ] ] ]
+		}
+	}]
+};
+var lookup = new PolygonLookup( featureCollection );
+var poly = lookup.search( 1, 2 );
+console.log( poly.properties.id ); // bar
 ```
-
-### options
-The `stream()` constructor accepts an options object, which configures the behavior of the lookup and may contain any of the following keys:
-
-  * `prop`: by default the stream looks for an object containing `lat`/`lon` keys in a property called `center_point`;
-    a different property name can be specified here.
-  * `logLevel`: the minimum level of log messages that the underlying logger,
-    [Winston](https://github.com/flatiron/winston), will print to the console. Defaults to `error`; see all possible
-    [options](https://github.com/flatiron/winston#using-logging-levels).
-
-## NPM Module
-
-The `pelias-hierarchy-lookup` npm module can be found here:
-
-[https://npmjs.org/package/pelias-hierarchy-lookup](https://npmjs.org/package/pelias-hierarchy-lookup)
-
-## Contributing
-
-Please fork and pull request against upstream master on a feature branch.
-
-Pretty please; provide unit tests and script fixtures in the `test` directory.
-
-### Running Unit Tests
-
-```bash
-$ npm test
-```
-
-### Continuous Integration
-
-Travis tests every release against node version `0.10`
-
-[![Build Status](https://travis-ci.org/pelias/pelias-hierarchy-lookup.png?branch=master)](https://travis-ci.org/pelias/pelias-hierarchy-lookup)
