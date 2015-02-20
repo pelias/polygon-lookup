@@ -30,9 +30,8 @@ function PolygonLookup( featureCollection ){
  *
  * @param {number} x The x-coordinate of the point.
  * @param {number} y The y-coordinate of the point.
- * @return {undefined|object} If one bounding-box match was found, return the
- *    respective polygon; if multiple matches were found, return the first one
- *    that's identified to definitely intersect; if none were found,
+ * @return {undefined|object} If one or more bounding box intersections are
+ *    found, return the first polygon that intersects (`x`, `y`); otherwise,
  *    `undefined`.
  */
 PolygonLookup.prototype.search = function search( x, y ){

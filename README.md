@@ -16,9 +16,8 @@ operates entirely in memory, and works best for polygons with little overlap.
   * `featureCollection` (**optional**): A GeoJSON collection to optionally immediately load with `.loadFeatureCollection()`.
 
 ##### `PolygonLookup.search(x, y)`
-Narrows down the candidate polygons by bounding-box. If only one bbox intersects, immediately return the corresponding
-polygon (this *may* result in a false flag intersection); if more than one was found, perform point-in-polygon
-intersections (this'll only return the *first* polygon that's found to intersect).
+Narrows down the candidate polygons by bounding-box, and then performs point-in-polygon intersections to identify the
+first container polygon (and only the first, even if multiple polygons really do intersect).
 
   * `x`: the x-coordinate to search for
   * `y`: the y-coordinate to search for
