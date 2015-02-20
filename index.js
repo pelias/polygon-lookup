@@ -37,17 +37,12 @@ function PolygonLookup( featureCollection ){
  */
 PolygonLookup.prototype.search = function search( x, y ){
   var bboxes = this.rtree.search( [ x, y, x, y ] );
-  if( bboxes.length === 1 ){
-    return this.polygons[ bboxes[ 0 ].polyId ];
-  }
-  else {
-    var pt = [ x, y ];
-    for( var ind = 0; ind < bboxes.length; ind++ ){
-      var polyObj = this.polygons[ bboxes[ ind ].polyId ];
-      var polyCoords = polyObj.geometry.coordinates[ 0 ];
-      if( pointInPolygon( pt, polyCoords ) ){
-        return polyObj;
-      }
+  var pt = [ x, y ];
+  for( var ind = 0; ind < bboxes.length; ind++ ){
+    var polyObj = this.polygons[ bboxes[ ind ].polyId ];
+    var polyCoords = polyObj.geometry.coordinates[ 0 ];
+    if( pointInPolygon( pt, polyCoords ) ){
+      return polyObj;
     }
   }
 };
