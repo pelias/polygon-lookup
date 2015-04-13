@@ -41,7 +41,17 @@ PolygonLookup.prototype.search = function search( x, y ){
     var polyObj = this.polygons[ bboxes[ ind ].polyId ];
     var polyCoords = polyObj.geometry.coordinates[ 0 ];
     if( pointInPolygon( pt, polyCoords ) ){
-      return polyObj;
+      var inHole = false;
+      for( var subPolyInd = 1; subPolyInd < polyObj.geometry.coordinates.length; subPolyInd++ ){
+        if( pointInPolygon( pt, polyObj.geometry.coordinates[ subPolyInd ] ) ){
+          inHole = true;
+          break;
+        }
+      }
+
+      if( !inHole ){
+        return polyObj;
+      }
     }
   }
 };

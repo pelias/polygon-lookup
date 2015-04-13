@@ -8,6 +8,7 @@ var tape = require( 'tape' );
 var PolygonLookup = require( '../index' );
 var rbush = require( 'rbush' );
 var polygonUtils = require( '../lib/polygon_utils' );
+var util = require( 'util' );
 
 tape( 'Exports a function', function ( test ){
   test.equal( typeof PolygonLookup, 'function', 'Is a function.' );
@@ -63,15 +64,15 @@ tape( 'PolygonLookup.search() searches correctly.', function ( test ){
     type: 'FeatureCollection',
     features: [
       geojsonPoly(
-        [ [ 2, 2 ], [ 6, 4 ], [ 4, 7 ] ],
+        [ [ [ 2, 2 ], [ 6, 4 ], [ 4, 7 ] ] ],
         { id: 1 }
       ),
       geojsonPoly(
-        [ [ 3, 0 ], [ 7, 2 ], [ 4, 4 ] ],
+        [ [ [ 3, 0 ], [ 7, 2 ], [ 4, 4 ] ] ],
         { id: 2 }
       ),
       geojsonPoly(
-        [ [ 8, 5 ], [ 10, 6 ], [ 9, 7 ] ],
+        [ [ [ 8, 5 ], [ 10, 6 ], [ 9, 7 ] ] ],
         { id: 3 }
       )
     ]
@@ -101,6 +102,56 @@ tape( 'PolygonLookup.search() searches correctly.', function ( test ){
     }
     else {
       test.equal( poly, undefined, 'No intersected polygon for: ' + pt );
+    }
+  });
+  test.end();
+});
+
+tape( 'PolygonLookup.search() handles polygons with multiple rings.', function ( test ){
+  var poly1Hole = [ [ 3, 3 ], [ 6, 3 ], [ 6, 7 ], [ 4, 6 ] ];
+  var collection = {
+    type: 'FeatureCollection',
+    features: [
+      geojsonPoly(
+        [
+          [ [ 1, 12 ], [ 0, 0 ], [ 15, -1 ], [ 15, 13 ] ],
+          [ [ 2, 11 ], [ 1, 2 ], [ 6, 0 ], [ 14, 0 ], [ 14, 11 ] ]
+        ],
+        { id: 0 }
+      ),
+      geojsonPoly(
+        [
+          [ [ 1, 2 ], [ 7, 1 ], [ 8, 9 ], [ 3, 7 ] ],
+          poly1Hole
+        ],
+        { id: 1 }
+      ),
+      geojsonPoly(
+        [ poly1Hole ],
+        { id: 2 }
+      )
+    ]
+  };
+  var lookup = new PolygonLookup( collection );
+
+  var testCases = [
+    { point: [ 10, 12 ], id: 0 },
+    { point: [ 5, 4 ], id: 2 },
+    { point: [ 2, 3 ], id: 1 },
+    { point: [ 13, 4 ] }
+  ];
+
+  testCases.forEach( function ( testCase ){
+    var pt = testCase.point;
+    var poly = lookup.search( pt[ 0 ], pt[ 1 ] );
+    if( !( 'id' in testCase ) ){
+      test.equal( poly, undefined, 'No intersected polygon for: ' + pt );
+    }
+    else {
+      test.equal(
+        poly.properties.id, testCase.id,
+        util.format( 'Id %d matches expected %d.', poly.properties.id, testCase.id )
+      );
     }
   });
   test.end();
@@ -139,7 +190,7 @@ function geojsonPoly( coords, props ){
     properties: props || {},
     geometry: {
       type: 'Polygon',
-      coordinates: [ coords ]
+      coordinates: coords
     }
   };
 }
