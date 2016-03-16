@@ -1,5 +1,7 @@
 language: node_js
 
+sudo: false
+language: node_js
 node_js:
   - 0.10
   - 0.12
@@ -9,12 +11,12 @@ matrix:
     allow_failures:
         - node_js: 4.4
         - node_js: 5.8
-
-install:
- - npm install
-
-before_script:
- - npm install npm
-
-script:
- - npm test
+env:
+  global:
+    - CXX=g++-4.8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
