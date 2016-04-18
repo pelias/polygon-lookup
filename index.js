@@ -75,7 +75,8 @@ PolygonLookup.prototype.loadFeatureCollection = function loadFeatureCollection( 
   }
 
   function indexFeature( poly ){
-    if( poly.geometry.coordinates[ 0 ] !== undefined &&
+    if( poly.geometry &&
+        poly.geometry.coordinates[ 0 ] !== undefined &&
         poly.geometry.coordinates[ 0 ].length > 0){
       switch( poly.geometry.type ){
         case 'Polygon':
