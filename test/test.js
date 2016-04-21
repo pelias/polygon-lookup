@@ -181,6 +181,23 @@ tape( 'getBoundingBox() finds correct bounding boxes.', function ( test ){
   test.end();
 });
 
+tape( 'undefined geometries are handled gracefully', function(t) {
+  var collection = {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature',
+        properties: {}
+      }
+    ]
+  };
+
+  var lookup = new PolygonLookup();
+  lookup.loadFeatureCollection( collection );
+  t.ok( lookup.rtree instanceof rbush, 'Sets `rtree`.' );
+  t.end();
+});
+
 /**
  * Convenience function for creating a GeoJSON polygon.
  */
