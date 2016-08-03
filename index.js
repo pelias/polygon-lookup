@@ -24,20 +24,25 @@ function PolygonLookup( featureCollection ){
 }
 
 /**
- * Find the polygon that a point intersects. Execute a bounding-box search to
+ * Find polygon(s) that a point intersects. Execute a bounding-box search to
  * narrow down the candidate polygons to a small subset, and then perform
  * additional point-in-polygon intersections to resolve any ambiguities.
  *
  * @param {number} x The x-coordinate of the point.
  * @param {number} y The y-coordinate of the point.
- * @return {undefined|object} If one or more bounding box intersections are
- *    found, return the first polygon that intersects (`x`, `y`); otherwise,
- *    `undefined`.
+ * @param {number} [limit] Number of results to return (-1 to return all the results).
+ * @return {undefined|object|array} If one or more bounding box intersections are
+ *    found and limit is undefined, return the first polygon that intersects (`x`, `y`); otherwise,
+ *    `undefined`. If a limit is passed in, return intercecting polygons as an array.
  */
-PolygonLookup.prototype.search = function search( x, y ){
+PolygonLookup.prototype.search = function search( x, y, limit ){
+  if ( limit === 0 ){
+    return [];
+  }
   var bboxes = this.rtree.search( [ x, y, x, y ] );
   var pt = [ x, y ];
-  for( var ind = 0; ind < bboxes.length; ind++ ){
+  var results = [];
+  for( var ind = 0; ind < bboxes.length && ( limit === undefined || limit === -1 || limit > 0 ); ind++ ){
     var polyObj = this.polygons[ bboxes[ ind ].polyId ];
     var polyCoords = polyObj.geometry.coordinates[ 0 ];
     if( pointInPolygon( pt, polyCoords ) ){
@@ -50,10 +55,18 @@ PolygonLookup.prototype.search = function search( x, y ){
       }
 
       if( !inHole ){
-        return polyObj;
+        if ( limit === undefined ){
+          return polyObj;
+        }
+        results.push( polyObj );
+        if ( limit !== -1 ){
+          limit--;
+        }
       }
     }
   }
+
+  return ( limit === undefined ? undefined : results );
 };
 
 /**
