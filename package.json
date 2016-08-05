@@ -8,7 +8,9 @@
   "main": "index.js",
   "scripts": {
     "test": "node test/test.js | tap-spec",
-    "travis": "npm test"
+    "travis": "npm test",
+    "lint": "jshint .",
+    "validate": "npm ls"
   },
   "repository": {
     "type": "git",
@@ -35,9 +37,14 @@
     "through2": "^0.6.3"
   },
   "devDependencies": {
-    "tape": "^2.13.4",
+    "jshint": "2.5.11",
+    "precommit-hook": "^3.0.0",
     "tap-spec": "^0.2.0",
-    "precommit-hook": "1.0.7",
-    "jshint": "2.5.11"
-  }
+    "tape": "^2.13.4"
+  },
+  "pre-commit": [
+    "lint",
+    "validate",
+    "test"
+  ]
 }
