@@ -35,7 +35,7 @@ function PolygonLookup( featureCollection ){
  *    `undefined`.
  */
 PolygonLookup.prototype.search = function search( x, y ){
-  var bboxes = this.rtree.search( [ x, y, x, y ] );
+  var bboxes = this.rtree.search( { minX: x, minY: y, maxX: x, maxY: y } );
   var pt = [ x, y ];
   for( var ind = 0; ind < bboxes.length; ind++ ){
     var polyObj = this.polygons[ bboxes[ ind ].polyId ];
