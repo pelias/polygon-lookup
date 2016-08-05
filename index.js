@@ -6,7 +6,7 @@
 
 'use strict';
 
-var rbush = require( 'rbush' );
+var Rbush = require( 'rbush' );
 var pointInPolygon = require( 'point-in-polygon' );
 var polygonUtils = require( './lib/polygon_utils' );
 
@@ -102,7 +102,7 @@ PolygonLookup.prototype.loadFeatureCollection = function loadFeatureCollection( 
   }
 
   collection.features.forEach( indexFeature );
-  this.rtree = new rbush().load( bboxes );
+  this.rtree = new Rbush().load( bboxes );
   this.polygons = polygons;
 };
 
