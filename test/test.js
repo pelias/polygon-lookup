@@ -161,15 +161,15 @@ tape( 'getBoundingBox() finds correct bounding boxes.', function ( test ){
   var testCases = [
     {
       poly: [ [ 2, 2 ], [ 6, 4 ], [ 4, 7 ] ],
-      bbox: [ 2, 2, 6, 7 ]
+      bbox: { minX: 2, minY: 2, maxX: 6, maxY: 7}
     },
     {
       poly: [ [ 0, 0 ], [ 2, 1 ], [ 3, -1 ], [ 5, 1 ], [ 6, 4 ], [ 3, 5 ] ],
-      bbox: [ 0, -1, 6, 5 ]
+      bbox: { minX: 0, minY: -1, maxX: 6, maxY: 5}
     },
     {
       poly: [ [ 2, 1 ], [ 3, 0 ], [ 4, 3 ], [ 0, 5 ], [ 1, -3 ] ],
-      bbox: [ 0, -3, 4, 5 ]
+      bbox: { minX: 0, minY: -3, maxX: 4, maxY: 5}
     }
   ];
 
