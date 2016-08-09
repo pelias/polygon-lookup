@@ -9,6 +9,7 @@
 var Rbush = require( 'rbush' );
 var pointInPolygon = require( 'point-in-polygon' );
 var polygonUtils = require( './lib/polygon_utils' );
+var _ = require('lodash');
 
 /**
  * @property {rbush} rtree A spatial index for `this.polygons`.
@@ -48,10 +49,12 @@ PolygonLookup.prototype.searchForOnePolygon = function searchForOnePolygon( x, y
   var point = [ x, y ];
 
   // get the polygon for each possibly matching polygon based on the searched bboxes
-  return bboxes.map(function(bbox, index) {
+  var polygons = bboxes.map(function(bbox, index) {
     return this.polygons[ bboxes[index].polyId ];
   // find the first polygon that actually intersects and return it
-  }, this).find(function(polyObj) {
+  }, this);
+
+  return _.find(polygons, function(polyObj) {
     return pointInPolygonWithHoles(point, polyObj);
   });
 };
