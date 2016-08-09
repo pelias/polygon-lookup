@@ -89,6 +89,7 @@ tape( 'PolygonLookup.search() searches correctly.', function ( test ){
     { point: [ 9, 6 ], id: 3 },
     { point: [ 9.7, 6.7 ] },
     { point: [ 10, 11 ] },
+    { point: [ 3, 3.9], id: 1 },
   ];
 
   testCases.forEach( function ( testCase ){
