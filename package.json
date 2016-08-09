@@ -33,6 +33,7 @@
     "elasticsearch": ">=1.1.1"
   },
   "dependencies": {
+    "lodash": "^4.14.2",
     "point-in-polygon": "1.0.1",
     "rbush": "2.0.1",
     "through2": "^2.0.1"
