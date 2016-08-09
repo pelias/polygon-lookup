@@ -177,41 +177,48 @@ tape( 'PolygonLookup.search() respects limit argument.', function ( test ){
   };
 
   var lookup = new PolygonLookup( collection );
-  var testCases = [
-    { point: [ 3, 3 ], limit: undefined, result: { id: 1 } },
-    { point: [ 3, 3 ], limit: 1, result: [ { id: 1 } ] },
-    { point: [ 3, 3 ], limit: -1, result: [ { id: 1 }, { id : 3 } ] },
-    { point: [ 10, 10 ], limit: -1, result: [] },
-    { point: [ 10, 10 ], limit: undefined, result: undefined },
-  ];
 
-  testCases.forEach( function ( testCase ){
-    var pt = testCase.point;
-    var poly = lookup.search( pt[ 0 ], pt[ 1 ], testCase.limit );
-    if( testCase.result ){
-      if ( Array.isArray( testCase.result ) ){
-        test.equal(
-          poly.length, testCase.result.length,
-          'Intersected ' + testCase.result.length + ' polygon(s) for: ' + pt + ', limit: ' + testCase.limit
-        );
-        testCase.result.forEach( function ( result, idx ){
-          test.equal(
-            poly[idx].properties.id, result.id,
-            'Intersected polygon[' + idx + '] correctly for: ' + pt
-          );
-        });
-      } else{
-        test.equal(
-          poly.properties.id, testCase.result.id,
-          'Intersected correct polygon for: ' + pt + ', limit: ' + testCase.limit
-        );
-      }
-    }
-    else {
-      test.equal( poly, undefined, 'No intersected polygon for: ' + pt + ', limit: ' + testCase.limit );
-    }
+  test.test('point inside polygon 1 and 3 with no limit specified returns polygon 1', function(t) {
+    var point = [3, 3];
+    var result = lookup.search(point[0], point[1]);
+    t.equal(result.properties.id, 1, 'first polygon returned');
+    t.end();
   });
-  test.end();
+
+  test.test('point inside polygon 1 and 3 with limit 1 returns array with polygon 1', function(t) {
+    var point = [3, 3];
+    var result = lookup.search(point[0], point[1], 1);
+
+    test.equal(result.length, 1, 'array with one element returned');
+    test.equal(result[0].properties.id, 1, 'first polygon returned');
+    t.end();
+  });
+
+  test.test('point inside polygon 1 and 3 with limit -1 returns array with polygons 1 and 3', function(t) {
+    var point = [3, 3];
+    var result = lookup.search(point[0], point[1], -1);
+
+    test.equal(result.length, 2, 'array with two elements returned');
+    test.equal(result[0].properties.id, 1, 'first polygon returned');
+    test.equal(result[1].properties.id, 3, 'third polygon returned');
+    t.end();
+  });
+
+  test.test('point inside no polygons with limit -1 returns empty array', function(t) {
+    var point = [10, 10];
+    var result = lookup.search(point[0], point[1], -1);
+
+    test.equal(result.length, 0, 'empty array returned');
+    t.end();
+  });
+
+  test.test('point inside no polygons with limit unset returns undefined', function(t) {
+    var point = [10, 10];
+    var result = lookup.search(point[0], point[1]);
+
+    test.equal(result, undefined, 'undefined returned');
+    t.end();
+  });
 });
 
 tape( 'getBoundingBox() finds correct bounding boxes.', function ( test ){
