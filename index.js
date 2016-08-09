@@ -23,6 +23,22 @@ function PolygonLookup( featureCollection ){
   }
 }
 
+// Calculate point in polygon intersection, accounting for any holes
+function pointInPolygonWithHoles(point, polygons) {
+  var mainPolygon = polygons.geometry.coordinates[0];
+  if( pointInPolygon( point, mainPolygon ) ){
+    for( var subPolyInd = 1; subPolyInd < polygons.geometry.coordinates.length; subPolyInd++ ){
+      if( pointInPolygon( point, polygons.geometry.coordinates[ subPolyInd ] ) ){
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+
+
 /**
  * Find polygon(s) that a point intersects. Execute a bounding-box search to
  * narrow down the candidate polygons to a small subset, and then perform
@@ -36,32 +52,28 @@ function PolygonLookup( featureCollection ){
  *    `undefined`. If a limit is passed in, return intercecting polygons as an array.
  */
 PolygonLookup.prototype.search = function search( x, y, limit ){
-  if ( limit === 0 ){
-    return [];
+  if (limit === -1) {
+    limit = Number.MAX_SAFE_INTEGER;
   }
-  var bboxes = this.rtree.search( { minX: x, minY: y, maxX: x, maxY: y } );
-  var pt = [ x, y ];
-  var results = [];
-  for( var ind = 0; ind < bboxes.length && ( limit === undefined || limit === -1 || limit > 0 ); ind++ ){
-    var polyObj = this.polygons[ bboxes[ ind ].polyId ];
-    var polyCoords = polyObj.geometry.coordinates[ 0 ];
-    if( pointInPolygon( pt, polyCoords ) ){
-      var inHole = false;
-      for( var subPolyInd = 1; subPolyInd < polyObj.geometry.coordinates.length; subPolyInd++ ){
-        if( pointInPolygon( pt, polyObj.geometry.coordinates[ subPolyInd ] ) ){
-          inHole = true;
-          break;
-        }
-      }
 
-      if( !inHole ){
-        if ( limit === undefined ){
-          return polyObj;
-        }
-        results.push( polyObj );
-        if ( limit !== -1 ){
-          limit--;
-        }
+  var bboxes = this.rtree.search( { minX: x, minY: y, maxX: x, maxY: y } );
+  var point = [ x, y ];
+  var results = [];
+  for( var ind = 0; ind < bboxes.length; ind++ ){
+    // short circuit search if limit reached
+    if (results.length === limit) {
+      break;
+    }
+    var polyObj = this.polygons[ bboxes[ ind ].polyId ];
+    var intersects = pointInPolygonWithHoles(point, polyObj);
+
+    if (intersects) {
+      // return immediately if no limit specified
+      if (limit === undefined) {
+        return polyObj;
+      // push polygon onto results if limit not reached
+      } else if (results.length < limit) {
+        results.push(polyObj);
       }
     }
   }
