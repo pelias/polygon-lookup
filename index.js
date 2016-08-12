@@ -9,6 +9,7 @@
 var Rbush = require( 'rbush' );
 var pointInPolygon = require( 'point-in-polygon' );
 var polygonUtils = require( './lib/polygon_utils' );
+var _ = require('lodash');
 
 /**
  * @property {rbush} rtree A spatial index for `this.polygons`.
@@ -23,36 +24,94 @@ function PolygonLookup( featureCollection ){
   }
 }
 
+// Calculate point in polygon intersection, accounting for any holes
+function pointInPolygonWithHoles(point, polygons) {
+  var mainPolygon = polygons.geometry.coordinates[0];
+  if( pointInPolygon( point, mainPolygon ) ){
+    for( var subPolyInd = 1; subPolyInd < polygons.geometry.coordinates.length; subPolyInd++ ){
+      if( pointInPolygon( point, polygons.geometry.coordinates[ subPolyInd ] ) ){
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+
+/*
+ * Internal helper method to return a single matching polygon
+ */
+PolygonLookup.prototype.searchForOnePolygon = function searchForOnePolygon( x, y ) {
+  // find which bboxes contain the search point. their polygons _may_ intersect that point
+  var bboxes = this.rtree.search( { minX: x, minY: y, maxX: x, maxY: y } );
+
+  var point = [ x, y ];
+
+  // get the polygon for each possibly matching polygon based on the searched bboxes
+  var polygons = bboxes.map(function(bbox, index) {
+    return this.polygons[ bboxes[index].polyId ];
+  // find the first polygon that actually intersects and return it
+  }, this);
+
+  return _.find(polygons, function(polyObj) {
+    return pointInPolygonWithHoles(point, polyObj);
+  });
+};
+
+/*
+ * Internal helper method to return multiple matching polygons, up to a given limit.
+ * A limit of -1 means unlimited
+ */
+PolygonLookup.prototype.searchForMultiplePolygons = function searchForMultiplePolygons( x, y, limit ) {
+  if (limit === -1) {
+    limit = Number.MAX_SAFE_INTEGER;
+  }
+
+  var point = [ x, y ];
+  var bboxes = this.rtree.search( { minX: x, minY: y, maxX: x, maxY: y } );
+
+  // get the polygon for each possibly matching polygon based on the searched bboxes
+  var polygons = bboxes.map(function(bbox, index) {
+    return this.polygons[ bboxes[index].polyId ];
+  }, this);
+
+  // keep track of matches to avoid extra expensive calculations if limit reached
+  var matchesFound = 0;
+
+  // return all matching polygons, up to the limit
+  return polygons.filter(function(polygon) {
+    // short circuit if limit reached
+    if (matchesFound >= limit) {
+      return false;
+    }
+
+    var intersects = pointInPolygonWithHoles(point, polygon);
+    if (intersects) {
+      matchesFound++;
+      return true;
+    }
+    return false;
+  });
+};
+
 /**
- * Find the polygon that a point intersects. Execute a bounding-box search to
+ * Find polygon(s) that a point intersects. Execute a bounding-box search to
  * narrow down the candidate polygons to a small subset, and then perform
  * additional point-in-polygon intersections to resolve any ambiguities.
  *
  * @param {number} x The x-coordinate of the point.
  * @param {number} y The y-coordinate of the point.
- * @return {undefined|object} If one or more bounding box intersections are
- *    found, return the first polygon that intersects (`x`, `y`); otherwise,
- *    `undefined`.
+ * @param {number} [limit] Number of results to return (-1 to return all the results).
+ * @return {undefined|object|array} If one or more bounding box intersections are
+ *    found and limit is undefined, return the first polygon that intersects (`x`, `y`); otherwise,
+ *    `undefined`. If a limit is passed in, return intercecting polygons as an array.
  */
-PolygonLookup.prototype.search = function search( x, y ){
-  var bboxes = this.rtree.search( { minX: x, minY: y, maxX: x, maxY: y } );
-  var pt = [ x, y ];
-  for( var ind = 0; ind < bboxes.length; ind++ ){
-    var polyObj = this.polygons[ bboxes[ ind ].polyId ];
-    var polyCoords = polyObj.geometry.coordinates[ 0 ];
-    if( pointInPolygon( pt, polyCoords ) ){
-      var inHole = false;
-      for( var subPolyInd = 1; subPolyInd < polyObj.geometry.coordinates.length; subPolyInd++ ){
-        if( pointInPolygon( pt, polyObj.geometry.coordinates[ subPolyInd ] ) ){
-          inHole = true;
-          break;
-        }
-      }
-
-      if( !inHole ){
-        return polyObj;
-      }
-    }
+PolygonLookup.prototype.search = function search( x, y, limit ){
+  if (limit === undefined) {
+    return this.searchForOnePolygon( x, y );
+  } else {
+    return this.searchForMultiplePolygons( x, y, limit );
   }
 };
 

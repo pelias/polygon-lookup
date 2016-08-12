@@ -89,6 +89,7 @@ tape( 'PolygonLookup.search() searches correctly.', function ( test ){
     { point: [ 9, 6 ], id: 3 },
     { point: [ 9.7, 6.7 ] },
     { point: [ 10, 11 ] },
+    { point: [ 3, 3.9], id: 1 },
   ];
 
   testCases.forEach( function ( testCase ){
@@ -155,6 +156,70 @@ tape( 'PolygonLookup.search() handles polygons with multiple rings.', function (
     }
   });
   test.end();
+});
+
+tape( 'PolygonLookup.search() respects limit argument.', function ( test ){
+  var collection = {
+    type: 'FeatureCollection',
+    features: [
+      geojsonPoly(
+        [ [ [ 2, 2 ], [ 6, 4 ], [ 4, 7 ] ] ],
+        { id: 1 }
+      ),
+      geojsonPoly(
+        [ [ [ 3, 0 ], [ 7, 2 ], [ 4, 4 ] ] ],
+        { id: 2 }
+      ),
+      geojsonPoly(
+        [ [ [ 1, 0 ], [ 10, 2 ], [ 2, 7 ] ] ],
+        { id: 3 }
+      )
+    ]
+  };
+
+  var lookup = new PolygonLookup( collection );
+
+  test.test('point inside polygon 1 and 3 with no limit specified returns polygon 1', function(t) {
+    var point = [3, 3];
+    var result = lookup.search(point[0], point[1]);
+    t.equal(result.properties.id, 1, 'first polygon returned');
+    t.end();
+  });
+
+  test.test('point inside polygon 1 and 3 with limit 1 returns array with polygon 1', function(t) {
+    var point = [3, 3];
+    var result = lookup.search(point[0], point[1], 1);
+
+    test.equal(result.length, 1, 'array with one element returned');
+    test.equal(result[0].properties.id, 1, 'first polygon returned');
+    t.end();
+  });
+
+  test.test('point inside polygon 1 and 3 with limit -1 returns array with polygons 1 and 3', function(t) {
+    var point = [3, 3];
+    var result = lookup.search(point[0], point[1], -1);
+
+    test.equal(result.length, 2, 'array with two elements returned');
+    test.equal(result[0].properties.id, 1, 'first polygon returned');
+    test.equal(result[1].properties.id, 3, 'third polygon returned');
+    t.end();
+  });
+
+  test.test('point inside no polygons with limit -1 returns empty array', function(t) {
+    var point = [10, 10];
+    var result = lookup.search(point[0], point[1], -1);
+
+    test.equal(result.length, 0, 'empty array returned');
+    t.end();
+  });
+
+  test.test('point inside no polygons with limit unset returns undefined', function(t) {
+    var point = [10, 10];
+    var result = lookup.search(point[0], point[1]);
+
+    test.equal(result, undefined, 'undefined returned');
+    t.end();
+  });
 });
 
 tape( 'getBoundingBox() finds correct bounding boxes.', function ( test ){
