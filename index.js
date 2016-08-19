@@ -79,8 +79,8 @@ PolygonLookup.prototype.searchForMultiplePolygons = function searchForMultiplePo
   // keep track of matches to avoid extra expensive calculations if limit reached
   var matchesFound = 0;
 
-  // return all matching polygons, up to the limit
-  return polygons.filter(function(polygon) {
+  // filter matching polygons, up to the limit
+  polygons = polygons.filter(function(polygon) {
     // short circuit if limit reached
     if (matchesFound >= limit) {
       return false;
@@ -93,6 +93,12 @@ PolygonLookup.prototype.searchForMultiplePolygons = function searchForMultiplePo
     }
     return false;
   });
+
+  // return all matching polygons as a GeoJSON FeatureCollection
+  return {
+    type : 'FeatureCollection',
+    features : polygons,
+  };
 };
 
 /**
@@ -103,9 +109,9 @@ PolygonLookup.prototype.searchForMultiplePolygons = function searchForMultiplePo
  * @param {number} x The x-coordinate of the point.
  * @param {number} y The y-coordinate of the point.
  * @param {number} [limit] Number of results to return (-1 to return all the results).
- * @return {undefined|object|array} If one or more bounding box intersections are
+ * @return {undefined|object} If one or more bounding box intersections are
  *    found and limit is undefined, return the first polygon that intersects (`x`, `y`); otherwise,
- *    `undefined`. If a limit is passed in, return intercecting polygons as an array.
+ *    `undefined`. If a limit is passed in, return intercecting polygons as a GeoJSON FeatureCollection.
  */
 PolygonLookup.prototype.search = function search( x, y, limit ){
   if (limit === undefined) {

@@ -190,8 +190,9 @@ tape( 'PolygonLookup.search() respects limit argument.', function ( test ){
     var point = [3, 3];
     var result = lookup.search(point[0], point[1], 1);
 
-    test.equal(result.length, 1, 'array with one element returned');
-    test.equal(result[0].properties.id, 1, 'first polygon returned');
+    test.equal(result.type, 'FeatureCollection', 'feature collection returned');
+    test.equal(result.features.length, 1, 'feature collection with one feature returned');
+    test.equal(result.features[0].properties.id, 1, 'first polygon returned');
     t.end();
   });
 
@@ -199,9 +200,10 @@ tape( 'PolygonLookup.search() respects limit argument.', function ( test ){
     var point = [3, 3];
     var result = lookup.search(point[0], point[1], -1);
 
-    test.equal(result.length, 2, 'array with two elements returned');
-    test.equal(result[0].properties.id, 1, 'first polygon returned');
-    test.equal(result[1].properties.id, 3, 'third polygon returned');
+    test.equal(result.type, 'FeatureCollection', 'feature collection returned');
+    test.equal(result.features.length, 2, 'feature collection with two features returned');
+    test.equal(result.features[0].properties.id, 1, 'first polygon returned');
+    test.equal(result.features[1].properties.id, 3, 'third polygon returned');
     t.end();
   });
 
@@ -209,7 +211,8 @@ tape( 'PolygonLookup.search() respects limit argument.', function ( test ){
     var point = [10, 10];
     var result = lookup.search(point[0], point[1], -1);
 
-    test.equal(result.length, 0, 'empty array returned');
+    test.equal(result.type, 'FeatureCollection', 'feature collection returned');
+    test.equal(result.features.length, 0, 'feature collection with no features returned');
     t.end();
   });
 
