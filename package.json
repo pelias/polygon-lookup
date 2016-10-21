@@ -39,7 +39,7 @@
     "through2": "^2.0.1"
   },
   "devDependencies": {
-    "jshint": "2.9.3",
+    "jshint": "^2.9.4",
     "tape": "^4.6.0",
     "tap-spec": "^4.1.1",
     "precommit-hook": "^3.0.0",
