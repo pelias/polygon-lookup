@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "jshint": "^2.9.4",
-    "npm-check": "^5.4.0",
+    "npm-check": "git://github.com/orangejulius/npm-check.git#disable-update-check",
     "precommit-hook": "^3.0.0",
     "semantic-release": "^6.3.2",
     "tap-spec": "^4.1.1",
