@@ -10,8 +10,7 @@
     "test": "node test/test.js | tap-spec",
     "travis": "npm test",
     "lint": "jshint .",
-    "validate": "npm ls",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "validate": "npm ls"
   },
   "repository": {
     "type": "git",
@@ -48,5 +47,8 @@
     "lint",
     "validate",
     "test"
-  ]
+  ],
+  "release": {
+    "success": []
+  }
 }
