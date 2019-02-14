@@ -27,7 +27,7 @@
     "url": "https://github.com/pelias/polygon-lookup/issues"
   },
   "engines": {
-    "node": ">=6.0.0",
+    "node": ">=8.0.0",
     "npm": ">=1.4.3",
     "elasticsearch": ">=1.1.1"
   },
