@@ -193,6 +193,7 @@ tape( 'PolygonLookup.search() respects limit argument.', function ( test ){
     test.equal(result.type, 'FeatureCollection', 'feature collection returned');
     test.equal(result.features.length, 1, 'feature collection with one feature returned');
     test.equal(result.features[0].properties.id, 1, 'first polygon returned');
+    test.equal(result.features[0].id, 1, 'feature id retained');
     t.end();
   });
 
@@ -266,15 +267,53 @@ tape( 'undefined geometries are handled gracefully', function(t) {
   t.end();
 });
 
+tape( 'PolygonLookup.search() using MultiPolygon.', function ( test ){
+  var collection = {
+    type: 'FeatureCollection',
+    features: [
+      geojsonMultiPoly(
+        [ [ [ [ 2, 2 ], [ 6, 4 ], [ 4, 7 ] ] ], [ [ [ 3, 0 ], [ 7, 2 ], [ 4, 4 ] ] ] ],
+        { id: 1 }
+      ),
+    ]
+  };
+
+  var lookup = new PolygonLookup( collection );
+
+  test.test('point inside polygon 1 with no limit specified returns polygon 1', function(t) {
+    var point = [3, 3];
+    var result = lookup.search(point[0], point[1]);
+    t.equal(result.properties.id, 1, 'first polygon returned');
+    t.equal(result.id, 1, 'id included');
+    t.end();
+  });
+});
+
 /**
  * Convenience function for creating a GeoJSON polygon.
  */
 function geojsonPoly( coords, props ){
   return {
     type: 'Feature',
+    id: props && props.id,
     properties: props || {},
     geometry: {
       type: 'Polygon',
+      coordinates: coords
+    }
+  };
+}
+
+/**
+ * Convenience function for creating a GeoJSON multipolygon.
+ */
+function geojsonMultiPoly( coords, props ){
+  return {
+    type: 'Feature',
+    id: props && props.id,
+    properties: props || {},
+    geometry: {
+      type: 'MultiPolygon',
       coordinates: coords
     }
   };
