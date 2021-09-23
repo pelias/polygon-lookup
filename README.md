@@ -2,8 +2,6 @@
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/pelias/polygon-lookup.svg)](https://greenkeeper.io/)
 
-[![Build Status](https://travis-ci.org/pelias/polygon-lookup.svg?branch=master)](https://travis-ci.org/pelias/polygon-lookup)
-
 [![NPM](https://nodei.co/npm/polygon-lookup.png)](https://nodei.co/npm/polygon-lookup/)
 
 A data-structure for performing fast, accurate point-in-polygon intersections against (potentially very large) sets of
