@@ -40,7 +40,7 @@
     "jshint": "^2.9.4",
     "precommit-hook": "^3.0.0",
     "tap-spec": "^5.0.0",
-    "tape": "^4.10.1"
+    "tape": "^5.0.0"
   },
   "pre-commit": [
     "lint",
