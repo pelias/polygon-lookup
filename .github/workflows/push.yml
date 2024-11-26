@@ -6,7 +6,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - ubuntu-20.04
+          - ubuntu-22.04
         node-version:
           - 12.x
           - 14.x
@@ -24,7 +24,7 @@ jobs:
   npm-publish:
     needs: unit-tests
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Install Node.js
@@ -44,7 +44,7 @@ jobs:
     # note: github actions won't run a job if you don't call one of the status check functions, so `always()` is called since it evalutes to `true`
     if: ${{ always() && needs.unit-tests.result == 'success' && (needs.npm-publish.result == 'success' || needs.npm-publish.result == 'skipped') }}
     needs: [unit-tests, npm-publish]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Build Docker images
