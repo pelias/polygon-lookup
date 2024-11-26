@@ -1,0 +1,21 @@
+name: Unit Tests
+on: workflow_call
+jobs:
+  unit-tests:
+    runs-on: '${{ matrix.os }}'
+    strategy:
+      matrix:
+        os:
+          - ubuntu-22.04
+        node-version: [ 18.x, 20.x, 22.x ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: 'Install node.js ${{ matrix.node-version }}'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '${{ matrix.node-version }}'
+      - name: Run unit tests
+        run: |
+          [[ -f ./bin/ci-setup ]] && ./bin/ci-setup
+          npm install
+          npm run ci
