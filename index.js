@@ -159,6 +159,9 @@ PolygonLookup.prototype.loadFeatureCollection = function loadFeatureCollection( 
                 coordinates: childPolys[ ind ]
               }
             };
+            if ('id' in poly) {
+              childPoly.id = poly.id;
+            }
             indexPolygon( childPoly );
           }
           break;
